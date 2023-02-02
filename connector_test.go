@@ -95,9 +95,8 @@ func TestOtConnector_Connect(t *testing.T) {
 			for _, tc := range testCases {
 				t.Run(tc.name, func(t *testing.T) {
 					// Prepare traces
-					ctx, sr, tracer, dummySpan := prepareTraces(tc.noParentSpan)
+					ctx, cfg, sr, dummySpan := prepareTraces(t, tc.noParentSpan)
 
-					cfg := newMockConfig(t, tracer)
 					cfg.SpanOptions.OmitConnectorConnect = omitConnectorConnect
 					cfg.AttributesGetter = tc.attributesGetter
 					mConnector := newMockConnector(nil, tc.error)

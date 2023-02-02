@@ -82,11 +82,10 @@ func TestOtTx_Commit(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Prepare traces
-			ctx, sr, tracer, dummySpan := prepareTraces(tc.noParentSpan)
+			ctx, cfg, sr, dummySpan := prepareTraces(t, tc.noParentSpan)
 			mt := newMockTx(tc.error)
 
 			// New tx
-			cfg := newMockConfig(t, tracer)
 			cfg.AttributesGetter = tc.attributesGetter
 			tx := newTx(ctx, mt, cfg)
 			// Commit
@@ -143,11 +142,10 @@ func TestOtTx_Rollback(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Prepare traces
-			ctx, sr, tracer, dummySpan := prepareTraces(tc.noParentSpan)
+			ctx, cfg, sr, dummySpan := prepareTraces(t, tc.noParentSpan)
 			mt := newMockTx(tc.error)
 
 			// New tx
-			cfg := newMockConfig(t, tracer)
 			cfg.AttributesGetter = tc.attributesGetter
 			tx := newTx(ctx, mt, cfg)
 

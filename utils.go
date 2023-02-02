@@ -79,7 +79,7 @@ func createSpan(ctx context.Context, cfg config, method Method, enableDBStatemen
 		attrs = append(attrs, cfg.AttributesGetter(ctx, method, query, args)...)
 	}
 
-	return cfg.Tracer.Start(ctx, cfg.SpanNameFormatter.Format(ctx, method, query),
+	return cfg.Tracer().Start(ctx, cfg.SpanNameFormatter.Format(ctx, method, query),
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(attrs...),
 	)

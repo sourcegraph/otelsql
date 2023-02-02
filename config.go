@@ -22,6 +22,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	metricglobal "go.opentelemetry.io/otel/metric/global"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -46,7 +47,6 @@ type AttributesGetter func(ctx context.Context, method Method, query string, arg
 
 type config struct {
 	TracerProvider trace.TracerProvider
-	Tracer         trace.Tracer
 
 	MeterProvider metric.MeterProvider
 	Meter         metric.Meter
@@ -136,10 +136,6 @@ func newConfig(options ...Option) config {
 		opt.Apply(&cfg)
 	}
 
-	cfg.Tracer = cfg.TracerProvider.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(Version()),
-	)
 	cfg.Meter = cfg.MeterProvider.Meter(
 		instrumentationName,
 		metric.WithInstrumentationVersion(Version()),
@@ -153,4 +149,18 @@ func newConfig(options ...Option) config {
 	}
 
 	return cfg
+}
+
+func (c *config) Tracer() trace.Tracer {
+	return c.TracerProvider.Tracer(
+		instrumentationName,
+		trace.WithInstrumentationVersion(Version()),
+	)
+}
+
+func withDBStatement(cfg config, query string) []attribute.KeyValue {
+	if cfg.SpanOptions.DisableQuery {
+		return cfg.Attributes
+	}
+	return append(cfg.Attributes, semconv.DBStatementKey.String(query))
 }

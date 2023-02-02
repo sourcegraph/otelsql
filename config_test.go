@@ -30,11 +30,7 @@ func TestNewConfig(t *testing.T) {
 	cfg := newConfig(WithSpanOptions(SpanOptions{Ping: true}), WithAttributes(semconv.DBSystemMySQL))
 	assert.Equal(t, config{
 		TracerProvider: otel.GetTracerProvider(),
-		Tracer: otel.GetTracerProvider().Tracer(
-			instrumentationName,
-			trace.WithInstrumentationVersion(Version()),
-		),
-		MeterProvider: global.MeterProvider(),
+		MeterProvider:  global.MeterProvider(),
 		Meter: global.MeterProvider().Meter(
 			instrumentationName,
 			metric.WithInstrumentationVersion(Version()),
@@ -48,5 +44,10 @@ func TestNewConfig(t *testing.T) {
 		SpanNameFormatter: &defaultSpanNameFormatter{},
 		SQLCommenter:      newCommenter(false),
 	}, cfg)
+
+	assert.Equal(t, cfg.Tracer(), otel.GetTracerProvider().Tracer(
+		instrumentationName,
+		trace.WithInstrumentationVersion(Version()),
+	))
 	assert.NotNil(t, cfg.Instruments)
 }

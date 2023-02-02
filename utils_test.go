@@ -129,7 +129,7 @@ func createDummySpan(ctx context.Context, tracer trace.Tracer) (context.Context,
 	return ctx, span
 }
 
-func newMockConfig(t *testing.T, tracer trace.Tracer) config {
+func newMockConfig(t *testing.T, tp trace.TracerProvider) config {
 	// TODO: use mock meter instead of noop meter
 	meter := metric.NewNoopMeterProvider().Meter("test")
 
@@ -137,7 +137,7 @@ func newMockConfig(t *testing.T, tracer trace.Tracer) config {
 	require.NoError(t, err)
 
 	return config{
-		Tracer:            tracer,
+		TracerProvider:    tp,
 		Meter:             meter,
 		Instruments:       instruments,
 		Attributes:        []attribute.KeyValue{defaultattribute},
@@ -215,16 +215,16 @@ func getExpectedSpanCount(noParentSpan bool, omitSpan bool) int {
 	return 0
 }
 
-func prepareTraces(noParentSpan bool) (context.Context, *tracetest.SpanRecorder, trace.Tracer, trace.Span) {
+func prepareTraces(t *testing.T, noParentSpan bool) (context.Context, config, *tracetest.SpanRecorder, trace.Span) {
 	sr, provider := newTracerProvider()
-	tracer := provider.Tracer("test")
+	cfg := newMockConfig(t, provider)
 
 	var dummySpan trace.Span
 	ctx := context.Background()
 	if !noParentSpan {
-		ctx, dummySpan = createDummySpan(context.Background(), tracer)
+		ctx, dummySpan = createDummySpan(context.Background(), cfg.Tracer())
 	}
-	return ctx, sr, tracer, dummySpan
+	return ctx, cfg, sr, dummySpan
 }
 
 func getDummyAttributesGetter() AttributesGetter {
